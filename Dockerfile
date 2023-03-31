@@ -14,4 +14,4 @@ COPY . ./
 RUN --mount=type=ssh pip install -r requirements.txt
 
 EXPOSE 8080
-CMD exec gunicorn --bind :$PORT --chdir /python/app/src --workers 1 --threads 8 --timeout 0 main:app
+CMD exec gunicorn --bind :$PORT --chdir /undertide/app/src --workers 1 --threads 8 --timeout 0 main:app
