@@ -1,0 +1,11 @@
+*__pycache__*
+Dockerfile
+Makefile
+README.md
+TODO.md
+poetry.lock
+poetry.toml
+pyproject.toml
+.DS_STORE
+.git/*
+.gitignore

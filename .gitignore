@@ -1,0 +1,22 @@
+data/*
+.vscode/*
+.python-version
+.venv/*
+requirements.txt
+.pytest_cache/
+*__pycache__*
+*.DS_Store*
+*.pyc
+.venv/*
+# Env
+*/.env/env
+*.coverage
+requirements.txt
+# Local notes and such
+NOTES.md
+scratch.py
+scratch.sh
+scratch.sql
+*/src/reports/*/report/*
+*/src/reports/*/data/*
+*/src/reports/*/log/*
