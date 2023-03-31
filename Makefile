@@ -31,5 +31,9 @@ docker-build: ## Build the docker image
 	docker build --ssh default . --platform linux/amd64 --tag=$(DOCKER_IMG)
 	rm requirements.txt
 
+bump_version: ## Bump the version
+	poetry version patch
+	$(shell poetry version --short > .VERSION)
+
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {{FS = ":.*?## "}}; {{printf "\\033[36m%-30s\\033[0m %s\\n", $$1, $$2}}'
