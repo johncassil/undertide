@@ -9,6 +9,7 @@ VERSION=$(shell poetry version --short)
 
 install: ## Install dependencies within a local virtual env
 	poetry install
+	poetry export -f requirements.txt --output requirements.txt --without-hashes
 	@echo "\\n undertide has been installed!\\nIn order to use all functionality, please populate the fixme's in ${PROJECT}/.env/env"
 
 shell: ## Spawn a shell that automatically sources the development venv
@@ -27,7 +28,6 @@ ruff: ## Auto-check all python code
 	poetry run ruff $(CODE) $(ENTRYPOINTS) $(TESTS)
 
 docker-build: ## Build the docker image
-	poetry export -f requirements.txt --output requirements.txt --without-hashes
 	docker build --ssh default . --platform linux/amd64 --tag=$(DOCKER_IMG)
 	rm requirements.txt
 

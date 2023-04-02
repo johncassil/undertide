@@ -2,7 +2,6 @@ data/*
 .vscode/*
 .python-version
 .venv/*
-requirements.txt
 .pytest_cache/
 *__pycache__*
 *.DS_Store*
