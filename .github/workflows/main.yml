@@ -27,6 +27,28 @@ jobs:
         with:
           path: ./.VERSION
 
+      - name: Configure Git
+        run: |
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "$GITHUB_ACTOR"
+
+      - name: Set Reftag
+        id: tag-version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.get-version.outputs.content }}
+          tag_prefix: ""
+
+      - name: Cut Release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
+          automatic_release_tag: ${{ steps.get-version.outputs.content }}
+          title: ${{ steps.get-version.outputs.content }}
+          files: LICENSE
+
       - name: Login To Github Docker Registry
         uses: docker/login-action@v1
         with:
@@ -59,24 +81,3 @@ jobs:
           tags: |
             ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get-version.outputs.content }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Configure Git
-        run: |
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git config user.name "$GITHUB_ACTOR"
-      - name: Set Reftag
-        id: tag-version
-        uses: mathieudutour/github-tag-action@v6.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ steps.get-version.outputs.content }}
-          tag_prefix: ""
-
-      - name: Cut Release
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: true
-          automatic_release_tag: ${{ steps.get-version.outputs.content }}
-          title: ${{ steps.get-version.outputs.content }}
-          files: LICENSE
