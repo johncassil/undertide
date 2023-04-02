@@ -10,7 +10,6 @@ data/*
 # Env
 */.env/env
 *.coverage
-requirements.txt
 # Local notes and such
 NOTES.md
 scratch.py
