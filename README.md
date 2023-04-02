@@ -41,7 +41,8 @@ undertide currently supports:
 undertide will soon support:
 - Snowflake
 - Redshift
-- PostgreSQL
+- Postgres
+- MySQL
 - DuckDB
 
 # File Format options
@@ -67,7 +68,7 @@ When undertide is called, it takes a json object as an argument.  The json objec
 - report_name (string)
     - The configuration for reports are stored in a bucket that you specify, and this is the name/path of the yaml file that contains the configuration for the report, for example, what data pull method to use, which sql file to use, or what logic to use to pull the file from a bucket (e.g. glob pattern, file name, etc).  In the future, this may also include emailing template or slack message template.
 
-- report_config (dict)
+- report_config (stringified dict)
     - This is a flexible field that can take additional JSON parameters that will be used in the JINJA templating for the SQL query or other report configuration logic.  This will likely be especially important for date ranges, customer names, or other filters if you build a flexible report that can serve multiple customers.
 
 - delivery_method (string)
@@ -79,7 +80,14 @@ When undertide is called, it takes a json object as an argument.  The json objec
         - slack
 
 - delivery_secret_name (string)
-    - This is the name of the secret that will be used to reference connection/authentication details, email addresses that need to emailed, slack details, etc. Other authentication details (for data pull sources, etc.) are stored in the undertide config secret.
+    - This is the name of the secret that will be used to reference bucket, connection/authentication details, email addresses that need to emailed, slack details, etc. Other authentication details (for data pull sources, etc.) are stored in the undertide config secret.
+
+- file_format (string) (optional)
+    - This is the format that the file will be delivered in.  By default, the file will be created in csv, (or delivered in the format that it is in the bucket -- so this won't apply).  This can be one of the following:
+        - csv
+        - txt
+        - parquet
+        - avro
 
 - compression (string) (optional)
     - This is the compression method that will be used to compress the file.  By default 'none' is used, unless set in the report config as a setting. This can be one of the following:
@@ -91,9 +99,68 @@ When undertide is called, it takes a json object as an argument.  The json objec
 - delivery_directory (string) (optional)
     - This is the directory that the file will be delivered to.  By default, the file will be delivered to the root directory.  This is useful if you want to deliver the file to a specific directory in the bucket, or if you want to deliver the file to a specific directory on the SFTP server.
 
-- config_secret_name (dict) (conditionally optional)
-    - undertide references a secret for its own configuration.  If running via Cloud Run or Fargate, the secret should be mounted to the container at secrets/config.yml and this is not needed.  If this is running in a kubernetes pod operator or ecs operator, the container will not have this config on boot, and this field should be used to specify the name of the secret that contains the config, as well as the service to use. e.g. {"secret": "undertide-config", "service": "aws"}
+- config_secret (stringified dict) (conditionally optional)
+    - undertide references a secret for its own configuration.  If running via Cloud Run or Fargate, the secret should be mounted to the container at secrets/config.json and this is not needed.  If this is running in a kubernetes pod operator or ecs operator, the container will not have this config on boot, and this field should be used to specify information on how to obtain the secret that contains the config, as well as the service to use. ( e.g. '{"secret": "undertide-config", "service": "aws", "region", "my-region}' | '{"secret": "undertide-config", "service": "gcp", "project": "my-project"}' )
+    Because AWS may need additonal credentials to access the secret, the docker image can also be run by passing in the following environment variables (This should not be needed in GCP, as the service account that is running the container should have access to the secret):
+        - AWS_ACCESS_KEY_ID (string)
+        - AWS_SECRET_ACCESS_KEY (string)
+    
+
+## Configuration secret
+The configuration secret is a json file that expects the following fields depending on the infrastructure that you are using:
+- cloud_provider (string) - This is the cloud provider that undertide is running on.  This can be one of the following:
+    - gcp
+    - aws
+- gcp_project (string) - This is the GCP project that undertide is running on.  This is only needed if the cloud_provider is set to gcp. This is used to reference the GCP secret manager.
+- aws_region (string) - This is the AWS region that undertide is running on.  This is only needed if the cloud_provider is set to aws. This is used to reference the AWS secrets manager.
+- aws_access_key_id (string) - This is the AWS access key that undertide is running on.  This is only needed if the cloud_provider is set to aws. This is used to reference the AWS secrets manager.
+- aws_secret_access_key (string) - This is the AWS secret access key that undertide is running on.  This is only needed if the cloud_provider is set to aws. This is used to reference the AWS secrets manager.
+- reports_config_bucket (string) - This is the bucket that contains the report configuration files.  This is where your shared repo will sync data to, and where undertide will look for the report configuration files.
+- reports_archive_bucket (string) - This is the bucket that contains a copy of all of the files that have been delivered by undertide.  This is useful for debugging and auditing purposes, and can be used to generate reports on what has been delivered to customers.  A policy can be set on the bucket to retain files for a certain amount of time, or indefinitely. If not set, this will default to the same bucket that reports are configured in, in a directory called 'delivered_reports'.
+
+## Report configuration
+The report configuration is a yaml file that expects the following fields:
+- data_pull_method (string) - This is the method that will be used to pull the data.  This can be one of the following:
+    - bigquery
+    - s3
+    - gcs
+    - snowflake
+    - redshift
+    - postgres
+    - mysql
+    - duckdb
+- file_format (string) - This is the format that the file will be delivered in.  This can be one of the following, or defaults to csv:
+    - csv
+    - txt
+    - parquet
+    - avro
+- compression (string) - This is the compression method that will be used to compress the file.  This can be one of the following:
+    - none
+    - gzip
+    - zip
+    - bz2
+- sql_file (string) - This is the name of the sql file that will be used to pull the data.  This file should be stored in the same bucket as the report configuration file.  By convention, this file should be stored in a directory 'reports/sql'.
+- python_file (string) - This is the name of the python file that will be used to pull the data if it's not a sql-based backend.  This file should be stored in the same bucket as the report configuration file. By convention, this file should be stored in a directory 'reports/python'.
+
+## Delivery Secret
+The delivery secret is a secret in JSON format that expects the following fields depending on the delivery method that you are using:
+- gcs
+    - bucket (string) - This is the bucket that the file will be delivered to.
+    - credentials (string) - This is the key to the service account that will be used to authenticate to GCS.  This is only needed if the cloud_provider is set to gcp. This is used to reference the GCP secret manager.
+- s3
+    - bucket (string) - This is the bucket that the file will be delivered to.
+    - aws_access_key_id (string) - This is the access key that will be used to authenticate to S3.
+    - aws_secret_access_key (string) - This is the secret key that will be used to authenticate to S3.
+- sftp
+    - host (string) - This is the host/endpoint that the file will be delivered to.
+    - port (string) - This is the port that the file will be delivered to. (Optional, defaults to 22)
+    - username (string) - This is the username that will be used to authenticate to SFTP.
+    - password (string) - This is the password that will be used to authenticate to SFTP.
+- delivery_directory (string) (optional)
+    - This is the directory that the file will be delivered to.  By default, the file will be delivered to the root directory.  This is useful if you want to deliver the file to a specific directory in the bucket, or if you want to deliver the file to a specific directory on the SFTP server. Can also be set/overridden in the call to undertide if a customer has different reports going to different directories.
+
 
 ## Installation
 This is currently a work in progress.  At the moment, you can build the docker image locally and run it.  In the future, we will have a docker image hosted.  Terraform templates will also be provided for deploying to GCP and AWS.
 
+What about storing copies of files?

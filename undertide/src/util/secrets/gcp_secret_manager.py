@@ -1,15 +1,13 @@
 import json
 import os
-
-from google.cloud import secretmanager
 import google.auth
-
+from google.cloud import secretmanager
 from src.logger import setup_logger
 
 L = setup_logger()
 
 
-class SecretManager:
+class GCPSecretManager:
     """Object for interacting with Google Secret Manager
 
     Attributes:
@@ -53,7 +51,20 @@ class SecretManager:
 
         return f"projects/{self.project_id}/secrets/{secret_id}/versions/{version_id}"
 
-    def get_secret(self, secret_id, version_id="latest", is_json=False):
+    # @staticmethod
+    # def _get_tokens_from_secrets_manager(client=self.client):
+    #     """Returns all valid tokens from the secrets manager secret.
+    #     Secrets will be stored in the JSON format:
+    #     {"token1":"expiration1","token2":"expiration2"}
+    #     where expiration is a UTC datetime string like "2020-01-01 00:00:00"
+    #     """
+    #     secret = "API_TOKENS"
+    #     name = f"projects/{self.project_id}/secrets/{secret}/versions/latest"
+    #     response = client.access_secret_version(request={"name": name})
+    #     tokens_json = json.loads(response.payload.data.decode("UTF-8"))
+    #     return tokens_json
+    
+    def get_secret(self, secret_id, version_id="latest"):
         """Retrieves stored contents for secret in GCP Secret Manager.
 
         Args:
@@ -78,12 +89,14 @@ class SecretManager:
         )
 
         # Return the decoded payload
-        if is_json:
-            L.info(
-                "Reading secret {}:{} payload as json.".format(secret_id, version_id)
-            )
-            secret_value = json.loads(response.payload.data.decode("UTF-8"))
-        else:
-            secret_value = response.payload.data.decode("UTF-8")
+        L.info(
+            "Reading secret {}:{} payload as json.".format(secret_id, version_id)
+        )
+        try:
+            json_secret = json.loads(response.payload.data.decode("UTF-8"))
+            
+        except json.decoder.JSONDecodeError:
+            raise ValueError("Secrets Manager secret %s is not valid JSON." % secret_id)
 
-        return secret_value
+
+        return json_secret
