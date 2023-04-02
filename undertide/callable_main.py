@@ -1,10 +1,8 @@
 import click
 import json
-from datetime import datetime
 from src.logger import setup_logger
 from src.report import UndertideReport
-# from src.util.pushers.sftp   import UndertideSftp
-# from src.util.s3 import UndertideS3
+from src.util.secrets.secrets import SecretManager
 
 L = setup_logger()
 
@@ -17,7 +15,7 @@ L = setup_logger()
 )
 
 @click.option(
-    "--report_config",
+    "--report_config_jinja",
     help="(stringified dict) This is a flexible field that can take additional JSON parameters that will be used in the JINJA templating for the SQL query or other report configuration logic. This will likely be especially important for date ranges, customer names, or other filters if you build a flexible report that can serve multiple customers.",
 )
 
@@ -32,6 +30,12 @@ L = setup_logger()
     "--delivery_secret_name",
     required=True,
     help="This is the name of the secret that will be used to reference buckets, connection/authentication details, email addresses that need to emailed, slack details, etc. Other authentication details (for data pull sources, etc.) are stored in the undertide config secret.",
+)
+
+@click.option(
+    "--file_format",
+    default=None,
+    help="This is the format that the file will be delivered in.  By default, the file will be created in csv, (or delivered in the format that it is in the bucket -- so this won't apply).  This can be one of the following: csv, txt,parquet,avro",
 )
 
 @click.option(
@@ -71,21 +75,39 @@ L = setup_logger()
 # 8. Upload the file to the reports_archive_bucket 
 # 9. Deliver the file to the delivery method
 
-from src.util.secrets.secrets import SecretManager
-secret_manager = SecretManager()
-secret_value = secret_manager.get_secret('config_secret')
+
+
 
 def build_and_send_report(
     report_name: str,
-    report_config: str,
+    report_config_jinja: str,
     delivery_method: str,
-    : str,
+    delivery_secret_name: str,
+    file_format: str,
     compression: str,
     delivery_directory: str,
-) -> None: {
-    L.info(f"Beginning building report: {report_name} for delivery to {delivery_method}")
-}
+    config_secret: str
+    ):
 
+    # config_secret=json.loads(config_secret)
+
+    # secret_manager = SecretManager()
+    # secret_value = secret_manager.get_secret('config_secret')
+
+
+    L.info(f"Beginning building report: {report_name} for delivery to {delivery_method}")
+    report = UndertideReport(
+        report_name=report_name,
+        report_config_jinja=json.loads(report_config_jinja),
+        delivery_method=delivery_method,
+        delivery_secret_name=delivery_secret_name,
+        file_format=file_format,
+        compression=compression,
+        delivery_directory=delivery_directory
+    )
+    report
+
+    
 
 
 
