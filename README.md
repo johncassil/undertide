@@ -174,5 +174,3 @@ The delivery secret is a secret in JSON format that expects the following fields
 
 ## Installation
 This is currently a work in progress.  At the moment, you can build the docker image locally and run it.  In the future, we will have a docker image hosted.  Terraform templates will also be provided for deploying to GCP and AWS.
-
-What about storing copies of files?
