@@ -5,7 +5,7 @@ on:
     branches: ['main']
 
 jobs:
-  build-and-push-image:
+  ref-tag-and-release:
     runs-on: ubuntu-latest
     permissions:
       contents: read
