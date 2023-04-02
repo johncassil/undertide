@@ -60,12 +60,6 @@ jobs:
             ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get-version.outputs.content }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Get Version from file
-        id: get-version
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: ./.VERSION
-
       - name: Configure Git
         run: |
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
