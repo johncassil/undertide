@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "undertide"
-version = "0.9.8"
+version = "0.9.9"
 description = "data reporting tool"
 authors = ["John Cassil <johnpaul@hey.com>"]
 
