@@ -7,10 +7,7 @@ on:
 jobs:
   ref-tag-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
+    permissions: write-all
 
     steps:
       - name: Checkout repository
