@@ -29,7 +29,6 @@ ruff: ## Auto-check all python code
 
 docker-build: ## Build the docker image
 	docker build --ssh default . --platform linux/amd64 --tag=$(DOCKER_IMG)
-	rm requirements.txt
 
 bump_version: ## Bump the version
 	poetry version patch
