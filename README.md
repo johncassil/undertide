@@ -34,15 +34,15 @@ undertide will soon support:
 undertide supports multiple options to pull data that is used to send out.  These can be mix and matched depending on your infrastructure. For example, you can use BigQuery to execute a query for one report, and postgres or snowflake for another report.  Additionally, if the file has already been produced by some process and is currently sitting in a bucket, undertide can pull that file and send it out.
 
 undertide currently supports:
-- BigQuery 
-- S3 file pulls
-- GCS file pulls
-
-undertide will soon support:
+- BigQuery
 - Snowflake
 - Redshift
 - Postgres
 - MySQL
+- S3 file pulls
+- GCS file pulls
+
+undertide will soon support:
 - DuckDB
 
 # File Format options
@@ -55,9 +55,9 @@ undertide supports the following options:
 
 # Delivery options
 undertide supports the following options:
-- GCS
-- S3
-- SFTP
+- gcs
+- s3
+- sftp
 
 undertide will soon support:
 - Email
@@ -117,13 +117,25 @@ The configuration secret is a json file that expects the following fields depend
 - aws_secret_access_key (string) - This is the AWS secret access key that undertide is running on.  This is only needed if the cloud_provider is set to aws. This is used to reference the AWS secrets manager.
 - reports_config_bucket (string) - This is the bucket that contains the report configuration files.  This is where your shared repo will sync data to, and where undertide will look for the report configuration files.
 - reports_archive_bucket (string) - This is the bucket that contains a copy of all of the files that have been delivered by undertide.  This is useful for debugging and auditing purposes, and can be used to generate reports on what has been delivered to customers.  A policy can be set on the bucket to retain files for a certain amount of time, or indefinitely. If not set, this will default to the same bucket that reports are configured in, in a directory called 'delivered_reports'.
+- bigquery_project (string) - This is the GCP project that contains the bigquery data that will be pulled.  This is only needed if a data_pull_method is set to bigquery. This is used to reference the GCP secret manager.
+- redshift_connection_string (string) - This is the connection string that will be used to connect to redshift.  This is only needed if a data_pull_method is set to redshift.
+- snowflake_user (string) - This is the snowflake user that will be used to connect to snowflake.  This is only needed if a data_pull_method is set to snowflake.
+- snowflake_password (string) - This is the snowflake password that will be used to connect to snowflake.  This is only needed if a data_pull_method is set to snowflake.
+- snowflake_account (string) - This is the snowflake account that will be used to connect to snowflake.  This is only needed if a data_pull_method is set to snowflake.
+- snowflake_warehouse (string) - This is the snowflake warehouse that will be used to connect to snowflake.  This is only needed if a data_pull_method is set to snowflake.
+- snowflake_database (string) - This is the snowflake database that will be used to connect to snowflake.  This is only needed if a data_pull_method is set to snowflake.
+- snowflake_schema (string) - This is the snowflake schema that will be used to connect to snowflake.  This is only needed if a data_pull_method is set to snowflake.
+- postgres_connection_string (string) - This is the connection string that will be used to connect to postgres.  This is only needed if a data_pull_method is set to postgres.
+- mysql_connection_string (string) - This is the connection string that will be used to connect to mysql.  This is only needed if a data_pull_method is set to mysql.
+- duckdb_file_bucket (string) - This is the bucket that contains the duckdb file that will be used to pull data.  This is only needed if a data_pull_method is set to duckdb.
+- duckdb_file_path (string) - This is the path to the duckdb file that will be used to pull data.  This is only needed if a data_pull_method is set to duckdb.
 
 ## Report configuration
 The report configuration is a yaml file that expects the following fields:
 - data_pull_method (string) - This is the method that will be used to pull the data.  This can be one of the following:
-    - bigquery
     - s3
     - gcs
+    - bigquery
     - snowflake
     - redshift
     - postgres

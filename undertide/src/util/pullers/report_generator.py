@@ -8,7 +8,7 @@ from src.util.pullers.duckdb import UndertideDuckDB
 
 
 class UndertideSqlReportGenerator():
-    def __init__(self, db_type: str:
+    def __init__(self, db_type: str):
         self.db_type = db_type
 
     def execute_query(self, query: str) -> pd.DataFrame:

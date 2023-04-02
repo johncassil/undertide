@@ -14,8 +14,10 @@ class UndertideReportDeliverer():
         self.local_file_path = local_file_path
         self.delivery_method = delivery_method
         self.delivery_secret_name = delivery_secret_name
-        self.delivery_directory = delivery_directory
         self.delivery_secret = self.get_delivery_secret()
+        self.delivery_directory = delivery_directory
+        if self.delivery_directory is None:
+            self.delivery_directory = self.delivery_secret.get("delivery_directory", None)
         self.delivered_report = self.deliver_report()
 
     def get_delivery_secret(self):

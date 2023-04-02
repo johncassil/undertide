@@ -18,6 +18,8 @@ class UndertideReport():
         self.compression = compression
         self.delivery_directory = delivery_directory
         self.report_config = self.get_report_config()
+        if self.delivery_directory is None:
+            self.delivery_directory = self.report_config.delivery_directory
         self.report_data = self.build_report()
         self.local_file_path = self.write_report()
         self.delivered_report = self.deliver_report()
