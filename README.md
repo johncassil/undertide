@@ -6,11 +6,15 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/johncassil/undertide) 
+![Lifecycle:
+maturing](https://img.shields.io/badge/lifecycle-experimental-blueviolet.svg)
 [![CI Badge](https://github.com/johncassil/undertide/actions/workflows/main.yml/badge.svg?event=push)](https://github.com/johncassil/undertide/actions/workflows/main.yml)
 
 
 undertide is an open source data pipeline tool that allows you to run SQL queries and deliver the results to a variety of destinations in a variety of formats. It is built as an http callable that can be used easily with [Apache Airflow](https://airflow.apache.org/) and is designed to be used as a part of the modern data stack along with tools like [dbt](https://www.getdbt.com/).
 
+
+## Why undertide?
 Most explanations and diagrams of the modern data stack look like this:
 
 ![modern data stack](/etc/modern_data_stack.png)
@@ -23,7 +27,9 @@ This is where undertide comes in.  It allows you to run simple SQL queries to pu
 <br />
 <br />
 
-## !! undertide is currently significantly under development.  This is not yet ready for production use.
+## undertide is currently significantly under development.
+
+It is not yet ready for production use.  Heavy development is currently underway, and the API is subject to change.  Many adapters are currently being built and tested.
 <br />
 <br />
 
