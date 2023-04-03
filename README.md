@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="etc/undertide.png" alt="undertide logo" width="750"/>
+  <img src="etc/undertide.png" alt="undertide logo" width="450"/>
 </p>
 
 ## undertide

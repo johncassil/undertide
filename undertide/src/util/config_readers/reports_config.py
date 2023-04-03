@@ -67,15 +67,19 @@ class UndertideYamlConfig:
         self.file_format = self.contents.get('file_format', 'csv')
         self.sql_file = self.contents.get('sql_file')
         self.py_file = self.contents.get('py_file')
+        self.bucket = self.contents.get('bucket')
         self.file_reader = UndertideCloudFileRetriever()
         self.report_type = self._get_report_type()
         self.sql = self._get_sql()
         self.py = self._get_py()
 
     def _get_report_type(self):
-        if self._get_sql():
+        if self.sql_file:
             return 'sql'
-        elif self._get_py():
+        elif self.py_file:
+            # ensure that self.data_pull_method is either gcs or s3
+            if self.data_pull_method not in ['gcs', 's3']:
+                raise ValueError(f"Invalid data_pull_method: {self.data_pull_method} for data pull method: {self.data_pull_method}")
             return 'py'
         else:
             return None
