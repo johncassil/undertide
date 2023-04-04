@@ -226,6 +226,7 @@ The delivery secret is a secret in JSON format that expects the following fields
 This is currently a work in progress.  At the moment, you can build the docker image locally or pull from the github hosted image. Terraform templates will also be provided for deploying to GCP and AWS.
 
 ## Coming soon
+- --dry-run flag to query the data source and put the resulting file in the archive bucket (with 'dry-run' in the filename to be clear that it did not get sent) -- helpful for testing.
 - Support for more data sources & testing
 - Full support for the airflow workflow (Need to replace CMD with `python undertide/callable_main.py`)
 - Examples of how to use undertide
