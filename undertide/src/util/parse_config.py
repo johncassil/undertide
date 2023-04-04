@@ -5,7 +5,19 @@ from src.logger import setup_logger
 L = setup_logger()
 
 
-def parse_config():
+def parse_config_from_secret_config_file():
+    # Get the config_secret from mounted file secrets/config.json and determine the service to use, use it to initiate the secret manager client and secrets cache
+    L.info("Getting config_secret from mounted file secrets/config.json...")
+    try:
+        with open("secrets/config.json", "r") as file:
+            config_secret = json.load(file)
+            L.info("Got config_secret from mounted file secrets/config.json!")
+            parse_config(config_secret)
+    except Exception as e:
+        L.error(f"Error getting config_secret from mounted file secrets/config.json: {e}")
+        raise e
+
+def parse_config(config_secret: dict):
     """Parses the config and sets the env variables.
     The following items are expected depending on the setup:
     - cloud_provider
@@ -29,14 +41,6 @@ def parse_config():
     - duckdb_file_bucket
     - duckdb_file_path
     """
-    # Get the config_secret from mounted file secrets/config.json and determine the service to use, use it to initiate the secret manager client and secrets cache
-    L.info("Getting config_secret from mounted file secrets/config.json...")
-    try:
-        with open("secrets/config.json", "r") as file:
-            config_secret = json.load(file)
-    except Exception as e:
-        L.error(f"Error getting config_secret from mounted file secrets/config.json: {e}")
-        raise e
     
     L.info("Getting cloud_provider and setting env variable...")
     cloud_provider = config_secret.get("cloud_provider")
@@ -176,5 +180,58 @@ def parse_config():
     os.environ["DUCKDB_FILE_PATH"] = duckdb_file_path
     
 
+def parse_callable_config(config_secret):
+    """Parses the config and sets the env variables.
+    The following items are expected depending on the setup:
+    - cloud_provider
+    - gcp_project
+    - aws_region
+    - secret (of the full backend config)
 
+    - aws_access_key_id (as pre-existing env variable)
+    - aws_secret_access_key (as pre-existing env variable)
 
+    returns: secret
+    """
+    # Determine the service to use, use it to initiate the secret manager client and secrets cache
+
+    L.info("Getting cloud_provider and setting env variable...")
+    cloud_provider = config_secret.get("cloud_provider")
+    if not cloud_provider:
+        L.error("cloud_provider is missing from config_secret!")
+        raise Exception("cloud_provider is missing from config_secret!")
+    os.environ["CLOUD_PROVIDER"] = cloud_provider
+
+    if cloud_provider == "gcp":
+        L.info("Getting gcp_project and setting env variable...")
+        gcp_project = config_secret.get("gcp_project")
+        if not gcp_project:
+            L.error("gcp_project is missing from config_secret!")
+            raise Exception("gcp_project is missing from config_secret!")
+        os.environ["GCP_PROJECT"] = gcp_project
+    
+    elif cloud_provider == "aws":
+        L.info("Getting aws_region and setting env variable...")
+        aws_region = config_secret.get("aws_region")
+        if not aws_region:
+            L.error("aws_region is missing from config_secret!")
+            raise Exception("aws_region is missing from config_secret!")
+        os.environ["AWS_REGION"] = aws_region
+
+        L.info("Checking that aws_access_key_id env variable has been set...")
+        if "AWS_ACCESS_KEY_ID" not in os.environ:
+            L.error("AWS_ACCESS_KEY_ID is missing from environment!")
+            raise Exception("AWS_ACCESS_KEY_ID is missing from environment!")
+        
+        L.info("Checking that aws_secret_access_key env variable has been set...")
+        if "AWS_SECRET_ACCESS_KEY" not in os.environ:
+            L.error("AWS_SECRET_ACCESS_KEY is missing from environment!")
+            raise Exception("AWS_SECRET_ACCESS_KEY is missing from environment!")
+        
+    L.info("Getting the name of the config secret...")
+    secret_name = config_secret.get("secret_name")
+    if not secret_name:
+        L.error("secret_name is missing from config_secret!")
+        raise Exception("secret_name is missing from config_secret!")
+    
+    return secret_name

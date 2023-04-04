@@ -33,4 +33,4 @@ COPY . ./
 
 ENV PORT 8080
 EXPOSE $PORT
-CMD exec gunicorn --bind :$PORT --chdir undertide/src --workers 1 --threads 8 --timeout 0 main:app
+CMD exec gunicorn --bind :$PORT --chdir /app/undertide --workers 1 --threads 8 --timeout 0 main:app

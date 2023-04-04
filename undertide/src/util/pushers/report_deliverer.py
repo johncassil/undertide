@@ -4,7 +4,7 @@ import pyarrow.fs as pa_fs
 import paramiko
 import boto3
 from google.cloud import storage
-from src.util.secrets.secrets import SecretsManager
+from src.util.secrets.secrets import UndertideSecretsManager
 from src.logger import setup_logger
 
 L = setup_logger()
@@ -22,7 +22,7 @@ class UndertideReportDeliverer():
 
     def get_delivery_secret(self):
         # Get the delivery secret from secrets manager
-        secrets_manager = SecretsManager()
+        secrets_manager = UndertideSecretsManager()
         delivery_secret = secrets_manager.get_secret(self.delivery_secret_name)
         return delivery_secret
 

@@ -1,11 +1,11 @@
 import click
 import json
 from src.logger import setup_logger
-from src.report import UndertideReport
-from src.util.secrets.secrets import SecretManager
+from src.util.reports.reports import UndertideReport
+from src.util.secrets.secrets import UndertideSecretsManager
+from src.util.parse_config import parse_callable_config, parse_config
 
 L = setup_logger()
-
 
 @click.command()
 @click.option(
@@ -57,27 +57,6 @@ L = setup_logger()
     help="undertide references a secret for its own configuration. If running via Cloud Run or Fargate, the secret should be mounted to the container at secrets/config.yml and this is not needed. If this is running in a kubernetes pod operator or ecs operator, the container will not have this config on boot, and this field should be used to specify information on how to obtain the secret that contains the config, as well as the service to use. e.g. {'secret': 'undertide-config', 'service': 'aws'} | {'secret': 'undertide-config', 'service': 'gcp', 'project': 'my-project'}",
 )
 
-
-
-# Basic workflow -- for cloud run and docker call:
-
-# 1. Initialize the secret manager client and secrets cache
-#   Docker: Get the config_secret from click and determine the service to use, use it to initiate the secret manager client and secrets cache
-#   Cloud Run: Get the config_secret from mounted file secrets/config.yml and determine the service to use, use it to initiate the secret manager client and secrets cache
-# 2. Get the rest of the config from the config secret
-# 3. Add config items as env variables
-# 4. Get the delivery secret from the delivery secret
-# 5. Get the report config from the report config
-# 6. Build the report
-#    a. Find and execute the sql query (or other data pull method)
-#    b. Write the report to a file
-# 7. Compress the file if needed
-# 8. Upload the file to the reports_archive_bucket 
-# 9. Deliver the file to the delivery method
-
-
-
-
 def build_and_send_report(
     report_name: str,
     report_config_jinja: str,
@@ -89,11 +68,15 @@ def build_and_send_report(
     config_secret: str
     ):
 
-    # config_secret=json.loads(config_secret)
-
-    # secret_manager = SecretManager()
-    # secret_value = secret_manager.get_secret('config_secret')
-
+    # Get the config_secret from click and determine the service to use, use it to initiate the secret manager client and secrets cache
+    config_secret=json.loads(config_secret)
+    secret_name = parse_callable_config(config_secret)
+    # Initialize the secret manager client and secrets cache
+    secrets_manager = UndertideSecretsManager()
+    # Get the rest of the config from the config secret
+    secret_data = secrets_manager.get_secret(secret_name)
+    # Add config items as env variables
+    parse_config(secret_data)
 
     L.info(f"Beginning building report: {report_name} for delivery to {delivery_method}")
     report = UndertideReport(
@@ -105,7 +88,7 @@ def build_and_send_report(
         compression=compression,
         delivery_directory=delivery_directory
     )
-    report
+    L.info(f"Report delivered as {report.delivered_report}!")
 
     
 

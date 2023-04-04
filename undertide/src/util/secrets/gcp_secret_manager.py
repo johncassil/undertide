@@ -7,7 +7,7 @@ from src.logger import setup_logger
 L = setup_logger()
 
 
-class GCPSecretManager:
+class UndertideGCPSecretsManager:
     """Object for interacting with Google Secret Manager
 
     Attributes:

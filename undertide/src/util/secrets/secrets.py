@@ -1,17 +1,17 @@
 import os
 import time
 import datetime
-from util.secrets.aws_secret_manager import AWSSecretManager
-from util.secrets.gcp_secret_manager import GCPSecretManager
+from src.util.secrets.aws_secret_manager import UndertideAWSSecretsManager
+from src.util.secrets.gcp_secret_manager import UndertideGCPSecretsManager
 
-class SecretsManager:
+class UndertideSecretsManager:
 
     def __init__(self):
         cloud_provider = os.environ.get('CLOUD_PROVIDER')
         if cloud_provider == 'AWS':
-            self.secret_manager = AWSSecretManager()
+            self.secret_manager = AWSSecretsManager()
         elif cloud_provider == 'GCP':
-            self.secret_manager = GCPSecretManager()
+            self.secret_manager = GCPSecretsManager()
         else:
             raise ValueError("Invalid CLOUD_PROVIDER environment variable value. Please set it to 'AWS' or 'GCP'.")
 

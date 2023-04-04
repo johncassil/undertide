@@ -2,8 +2,8 @@ import json
 import os
 from flask import Flask, request
 from src.logger import setup_logger
-from src.util.parse_config import parse_config
-from src.util.secrets.secrets import SecretsManager
+from src.util.parse_config import parse_config_from_secret_config_file
+from src.util.secrets.secrets import UndertideSecretsManager
 from src.util.reports.reports import UndertideReport
 
 L = setup_logger()
@@ -14,8 +14,8 @@ L.info("Starting up...")
 #   Get the config_secret from mounted file secrets/config.json and determine the service to use:
 #       Add config items as env variables
 #       Use them to initiate the secret manager client and secrets cache
-config = parse_config()
-secrets_manager = SecretsManager()
+config = parse_config_from_secret_config_file()
+secrets_manager = UndertideSecretsManager()
 
 app = Flask(__name__)
 @app.route("/", methods=["POST"])
@@ -39,24 +39,9 @@ def build_and_send_report():
         delivery_directory=body.get("delivery_directory"),
     )
 
+    L.info(f"Report delivered as {report.delivered_report}!")
 
-
-
-
-
-    
-
-
-
-# 4. Get the delivery secret from the delivery secret
-# 5. Get the report config from the report config
-# 6. Build the report
-#    a. Find and execute the sql query (or other data pull method)
-#    b. Write the report to a file
-# 7. Compress the file if needed
-# 8. Upload the file to the reports_archive_bucket 
-# 9. Deliver the file to the delivery method
-
+    # Auth stuff -- not sure if this is the path we want to go down now.
     # L.info("Checking for token...")
     # token = None
     # if 'Authorization' in request.headers:
@@ -74,7 +59,6 @@ def build_and_send_report():
     #     L.error("Invalid token!")
     #     return "Invalid token!", 401
     
-
     return "OK", 200
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from src.logger import setup_logger
 L = setup_logger()
 
 
-class AWSSecretManager:
+class UndertideAWSSecretsManager:
     """
     Object for interacting with AWS Secrets Manager.
     Ensures that we can get AWS secrets in JSON from the AWS Secrets Manager.

@@ -1,11 +1,11 @@
 import json
 from jinja2 import Template
 from src.logger import setup_logger
-from util.config_readers.reports_config import UndertideCloudFileRetriever, UndertideYamlConfig
-from util.pullers.report_generator import UndertideSqlReportGenerator
-from util.writers.report_writer import UndertideReportWriter
-from util.pushers.report_deliverer import UndertideReportDeliverer
-from util.pullers.py_file import UndertidePyFileFinder
+from src.util.config_readers.reports_config import UndertideCloudFileRetriever, UndertideYamlConfig
+from src.util.pullers.report_generator import UndertideSqlReportGenerator
+from src.util.writers.report_writer import UndertideReportWriter
+from src.util.pushers.report_deliverer import UndertideReportDeliverer
+from src.util.pullers.py_file import UndertidePyFileFinder
 
 L = setup_logger()
 
