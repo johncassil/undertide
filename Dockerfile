@@ -2,7 +2,7 @@ FROM python:3.11-slim-bullseye
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git openssh-client libpq-dev gcc;
+    apt-get install -y git openssh-client libpq-dev gcc build-essential;
 
 RUN mkdir /root/.ssh && touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com>> /root/.ssh/known_hosts
