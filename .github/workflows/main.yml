@@ -52,7 +52,7 @@ jobs:
           context: .
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
-          platforms: linux/amd64, linux/arm64
+          platforms: linux/amd64
           push: true
           cache-from: type=local,src=/tmp/.build-cache
           cache-to: type=local,dest=/tmp/.build-cache
