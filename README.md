@@ -228,7 +228,8 @@ This is currently a work in progress.  At the moment, you can build the docker i
 ## Coming soon
 - --dry-run flag to query the data source and put the resulting file in the archive bucket (with 'dry-run' in the filename to be clear that it did not get sent) -- helpful for testing.
 - Support for more data sources & testing
-- Full support for the airflow workflow (Need to replace CMD with `python undertide/callable_main.py`)
+- File type transformations for files existing in buckets (parquet -> csv, etc)
+- Testing Full support for the airflow workflow (Need to replace CMD with `python undertide/callable_main.py`)
 - Examples of how to use undertide
 - A repo to get started with CI/CD for undertide (report config files, terraform templates, an airflow dag with flexible config to call undertide, etc.)
 - Full support for shipping files (instead of SQL-based reports)
