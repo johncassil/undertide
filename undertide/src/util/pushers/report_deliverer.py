@@ -20,7 +20,9 @@ class UndertideReportDeliverer:
 
     def get_delivery_secret(self):
         # Get the delivery secret from secrets manager
-        delivery_secret = UndertideSecretsManager().get_secret(self.delivery_secret_name)
+        delivery_secret = UndertideSecretsManager().get_secret(
+            self.delivery_secret_name
+        )
         if self.delivery_directory is None:
             self.delivery_directory = self.delivery_secret.get(
                 "delivery_directory", None
@@ -97,7 +99,6 @@ class UndertideReportDeliverer:
 
         return remote_file_path
 
-
     def deliver_report_gcs(self):
         """Uploads a local file to a Google Cloud Storage bucket"""
 
@@ -107,7 +108,9 @@ class UndertideReportDeliverer:
         # Get the gcs credentials from the delivery secret
         gcs_bucket = self.delivery_secret.get("gcs", {}).get("bucket", None)
         if gcs_bucket is None:
-            L.error(f"Missing gcs.bucket in delivery secret {self.delivery_secret_name}")
+            L.error(
+                f"Missing gcs.bucket in delivery secret {self.delivery_secret_name}"
+            )
             raise ValueError(
                 f"Missing gcs.bucket in delivery secret {self.delivery_secret_name}"
             )
@@ -136,14 +139,14 @@ class UndertideReportDeliverer:
             blob.upload_from_filename(self.local_file_path)
         except Exception as e:
             L.error(
-                f"Error uploading file {self.local_file_path} to GCS bucket: {gcs_bucket}"
+                f"Error uploading file {self.local_file_path} to GCS bucket: "
+                f"{gcs_bucket}"
             )
             L.error(e)
             raise e
 
         # Return the name of the uploaded file in the bucket
         return blob.name
-
 
     def deliver_report_s3(self):
         """Uploads a local file to an Amazon S3 bucket"""
@@ -152,7 +155,9 @@ class UndertideReportDeliverer:
             self.delivery_secret = self.get_delivery_secret()
 
         # Get the s3 credentials from the delivery secret
-        s3_access_key = self.delivery_secret.get("s3", {}).get("aws_access_key_id", None)
+        s3_access_key = self.delivery_secret.get("s3", {}).get(
+            "aws_access_key_id", None
+        )
         if s3_access_key is None:
             L.info(
                 f"Missing s3.aws_access_key_id in delivery secret "
@@ -176,7 +181,9 @@ class UndertideReportDeliverer:
         # Create an S3 client and upload the file to the bucket
         if s3_access_key and s3_secret_key:
             s3 = boto3.resource(
-                "s3", aws_access_key_id=s3_access_key, aws_secret_access_key=s3_secret_key
+                "s3",
+                aws_access_key_id=s3_access_key,
+                aws_secret_access_key=s3_secret_key,
             )
         else:
             s3 = boto3.resource("s3")
@@ -189,7 +196,9 @@ class UndertideReportDeliverer:
         try:
             s3.Bucket(s3_bucket).upload_file(self.local_file_path, file_name)
         except Exception as e:
-            L.error(f"Error uploading file {self.local_file_path} to S3 bucket {s3_bucket}")
+            L.error(
+                f"Error uploading file {self.local_file_path} to S3 bucket {s3_bucket}"
+            )
             L.error(e)
             raise e
 

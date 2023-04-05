@@ -39,7 +39,6 @@ class UndertideReportWriter:
         self.local_file_path = f"{self.file_name}.{self.file_format}"
         self.compressed_file_path = self.local_file_path
 
-
     def write_report(self):
         L.info(f"Writing report {self.report_name} to {self.local_file_path}")
         if self.file_format == "csv":
@@ -113,7 +112,6 @@ class UndertideReportWriter:
     def upload_to_cloud_storage_archive(self):
         cloud_env = os.getenv("CLOUD_PROVIDER")
 
-                
         if cloud_env == "gcp":
             L.info("Creating GCS client")
             if self.client is None:
@@ -130,7 +128,7 @@ class UndertideReportWriter:
             except Exception as e:
                 L.error(f"Error uploading file to GCS: {e}")
                 raise e
-                         
+
         elif cloud_env == "aws":
             L.info("Creating S3 client")
             if self.client is None:
@@ -142,7 +140,9 @@ class UndertideReportWriter:
             try:
                 L.info(f"Uploading {self.compressed_file_path} to {self.bucket_name}")
                 self.client.upload_file(
-                    self.compressed_file_path, self.bucket_name, f"sent_reports/{self.compressed_file_path}"
+                    self.compressed_file_path,
+                    self.bucket_name,
+                    f"sent_reports/{self.compressed_file_path}",
                 )
             except Exception as e:
                 L.error(f"Error uploading file to S3: {e}")
@@ -150,5 +150,3 @@ class UndertideReportWriter:
 
         else:
             raise ValueError(f"Unsupported cloud provider: {cloud_env}")
-
-

@@ -8,7 +8,6 @@ from src.util.secrets.gcp_secrets_manager import UndertideGCPSecretsManager
 
 class UndertideSecretsManager:
     def __init__(self):
-        
         self.secrets_manager = None
         self.cache = {}
         # self.token_cache = {}
@@ -22,7 +21,7 @@ class UndertideSecretsManager:
                 self.secrets_manager = UndertideGCPSecretsManager()
             else:
                 raise Exception(f"CLOUD_PROVIDER {cloud_provider} not supported.")
-            
+
         now = time.time()
         if secret_name in self.cache:
             value, timestamp = self.cache[secret_name]
