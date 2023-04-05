@@ -107,12 +107,13 @@ class UndertideReport:
         return local_file_path
 
     def deliver_report(self):
-        delivered_report = UndertideReportDeliverer(
+        report_deliverer = UndertideReportDeliverer(
             self.local_file_path,
             self.delivery_method,
             self.delivery_secret_name,
             self.delivery_directory,
         )
+        delivered_report = report_deliverer.deliver_report()
         return delivered_report
 
     def run(self):

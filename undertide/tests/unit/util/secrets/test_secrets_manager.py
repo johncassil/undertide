@@ -8,7 +8,7 @@ from src.util.secrets.secrets_manager import UndertideSecretsManager
 
 
 class TestUndertideSecretsManager(unittest.TestCase):
-    @patch.dict(os.environ, {"CLOUD_PROVIDER": "AWS"})
+    @patch.dict(os.environ, {"CLOUD_PROVIDER": "aws"})
     def test_get_secret_aws(self):
         mock_secret_manager = MagicMock(spec=UndertideAWSSecretsManager)
         mock_secret_manager.get_secret.return_value = "test-secret-value"
@@ -22,7 +22,7 @@ class TestUndertideSecretsManager(unittest.TestCase):
                 secrets_manager.get_secret("test-secret"), "test-secret-value"
             )
 
-    @patch.dict(os.environ, {"CLOUD_PROVIDER": "GCP"})
+    @patch.dict(os.environ, {"CLOUD_PROVIDER": "gcp"})
     def test_get_secret_gcp(self):
         mock_secret_manager = MagicMock(spec=UndertideGCPSecretsManager)
         mock_secret_manager.get_secret.return_value = "test-secret-value"

@@ -18,6 +18,7 @@ ipython: ## Run ipython
 	poetry run dotenv -f ${PROJECT}/.env/env run ipython
 
 test: ## Run all tests
+	rm test_report*
 	poetry run dotenv -f ${PROJECT}/.env/test run pytest --cov-report term-missing --cov=undertide/src/ ${PROJECT}/tests/ -W ignore::DeprecationWarning
 	rm test_report*
 
