@@ -1,2 +1,3 @@
 LOCAL=TRUE
 GCP_PROJECT=your-project-id
+REPORTS_ARCHIVE_BUCKET=bucket-name

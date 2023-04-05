@@ -17,7 +17,7 @@ class UndertideGCPSecretsManager:
 
     def __init__(self, project_id=None):
         # Create the Secret Manager client.
-        self.client = secretmanager.SecretManagerServiceClient()
+        self.client = None
 
         if not project_id:
             L.info("Getting project_id for SecretManager initialization.")
@@ -77,6 +77,9 @@ class UndertideGCPSecretsManager:
         Returns:
             (str or dict): Returns contents of stored secret as a string or dictionary.
         """
+        if self.client is None:
+            L.info("Creating Secret Manager client.")
+            self.client = secretmanager.SecretManagerServiceClient()
 
         L.info(
             f"Attempting to retrieve secret {secret_id}:{version_id} from "

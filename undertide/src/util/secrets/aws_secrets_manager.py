@@ -2,7 +2,6 @@ import json
 import os
 import boto3
 from botocore.exceptions import ClientError
-
 from src.logger import setup_logger
 
 L = setup_logger()
@@ -18,9 +17,10 @@ class UndertideAWSSecretsManager:
         self.region_name = region_name or os.environ.get("AWS_DEFAULT_REGION")
         self.access_key = access_key or os.environ.get("AWS_ACCESS_KEY_ID")
         self.secret_key = secret_key or os.environ.get("AWS_SECRET_ACCESS_KEY")
-        self.client = self._create_client()
+        self.client = None
 
     def _create_client(self):
+        L.info("Creating AWS Secrets Manager client.")
         kwargs = {"region_name": self.region_name}
         if self.access_key and self.secret_key:
             kwargs["aws_access_key_id"] = self.access_key
@@ -28,29 +28,31 @@ class UndertideAWSSecretsManager:
         return boto3.client("secretsmanager", **kwargs)
 
     def get_secret(self, secret_name):
+        if self.client is None:
+            self.client = self._create_client()
         try:
             response = self.client.get_secret_value(SecretId=secret_name)
         except ClientError as e:
             if e.response["Error"]["Code"] == "ResourceNotFoundException":
-                raise ValueError("Secrets Manager secret %s not found." % secret_name)
+                raise ValueError(f"Secrets Manager secret {secret_name} not found.")
             elif e.response["Error"]["Code"] == "InvalidRequestException":
                 raise ValueError(
-                    "Invalid request for Secrets Manager secret %s." % secret_name
+                    f"Invalid request for Secrets Manager secret {secret_name}."
                 )
             elif e.response["Error"]["Code"] == "InvalidParameterException":
                 raise ValueError(
-                    "Invalid parameter for Secrets Manager secret %s." % secret_name
+                    f"Invalid parameter for Secrets Manager secret {secret_name}."
                 )
             else:
                 raise e
         else:
             if "SecretString" in response:
-                L.info("Reading secret {} payload as json.".format(secret_name))
+                L.info(f"Reading secret {secret_name} payload as json.")
                 try:
                     json_secret = json.loads(response["SecretString"])
                 except json.decoder.JSONDecodeError:
                     raise ValueError(
-                        "Secrets Manager secret %s is not valid JSON." % secret_name
+                        f"Secrets Manager secret {secret_name} is not valid JSON."
                     )
 
                 return json_secret

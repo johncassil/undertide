@@ -5,7 +5,8 @@ import zipfile
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-import pyarrow.fs as fs
+import boto3
+from google.cloud import storage
 from datetime import datetime
 from src.logger import setup_logger
 
@@ -27,6 +28,7 @@ class UndertideReportWriter:
         self.compression = compression
         self.bucket_name = os.getenv("REPORTS_ARCHIVE_BUCKET")
         self.dry_run = dry_run
+        self.client = None
         if self.dry_run:
             timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
             self.file_name = f"DRY_RUN_{self.report_name}_{timestamp}"
@@ -34,28 +36,9 @@ class UndertideReportWriter:
             self.file_name = (
                 f"{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
             )
-        self.local_file_path = f"{self.file_name}.{self.file_type}"
+        self.local_file_path = f"{self.file_name}.{self.file_format}"
         self.compressed_file_path = self.local_file_path
-        self.cloud_prefix = self.get_cloud_provider()
-        self.cloud_file_path = (
-            f"{self.cloud_prefix}://{self.bucket_name}/{self.compressed_file_path}"
-        )
-        self.fs = self.get_fs()
 
-    def get_cloud_provider(self):
-        cloud_env = os.getenv("CLOUD_PROVIDER")
-        if cloud_env == "gcp":
-            return "gcs"
-        elif cloud_env == "aws":
-            return "s3"
-
-    def get_fs(self):
-        if self.cloud_prefix == "gcs":
-            return fs.GCSFileSystem()
-        elif self.cloud_prefix == "s3":
-            return fs.S3FileSystem()
-        else:
-            raise ValueError("Unsupported cloud provider")
 
     def write_report(self):
         L.info(f"Writing report {self.report_name} to {self.local_file_path}")
@@ -68,7 +51,7 @@ class UndertideReportWriter:
         elif self.file_format == "avro":
             self.write_avro_report()
         else:
-            raise ValueError(f"Unsupported file type: {self.file_type}")
+            raise ValueError(f"Unsupported file type: {self.file_format}")
 
         if self.compression:
             self.compress_report()
@@ -106,8 +89,6 @@ class UndertideReportWriter:
                     f_out.writelines(f_in)
             # Remove the original uncompressed file
             os.remove(self.local_file_path)
-            # Update the cloud file path
-            self.cloud_file_path = f"{self.cloud_provider}://{self.bucket_name}/{self.compressed_file_path}"
 
         elif self.compression == "bz2":
             # Compress the file with bzip2
@@ -117,8 +98,6 @@ class UndertideReportWriter:
                     f_out.writelines(f_in)
             # Remove the original uncompressed file
             os.remove(self.local_file_path)
-            # Update the cloud file path
-            self.cloud_file_path = f"{self.cloud_provider}://{self.bucket_name}/{self.compressed_file_path}"
 
         elif self.compression == "zip":
             # Compress the file with zip
@@ -127,15 +106,49 @@ class UndertideReportWriter:
                 zip_file.write(self.local_file_path)
             # Remove the original uncompressed file
             os.remove(self.local_file_path)
-            # Update the cloud file path
-            self.cloud_file_path = f"{self.cloud_provider}://{self.bucket_name}/{self.compressed_file_path}"
 
         else:
             raise ValueError(f"Unsupported compression type: {self.compression}")
 
-    def upload_to_cloud_storage_archive(self, file_path: str):
-        # Upload the file to the cloud storage archive
-        L.info(f"Uploading {self.compressed_file_path} to {self.cloud_file_path}")
-        with self.fs.open_output_stream(self.cloud_file_path) as cloud_file:
-            with open(file_path, "rb") as local_file:
-                cloud_file.write(local_file.read())
+    def upload_to_cloud_storage_archive(self):
+        cloud_env = os.getenv("CLOUD_PROVIDER")
+
+                
+        if cloud_env == "gcp":
+            L.info("Creating GCS client")
+            if self.client is None:
+                try:
+                    self.client = storage.Client()
+                except Exception as e:
+                    L.error(f"Error creating GCS client: {e}")
+                    raise e
+            try:
+                L.info(f"Uploading {self.compressed_file_path} to {self.bucket_name}")
+                bucket = self.client.get_bucket(self.bucket_name)
+                blob = bucket.blob(f"sent_reports/{self.compressed_file_path}")
+                blob.upload_from_filename(self.compressed_file_path)
+            except Exception as e:
+                L.error(f"Error uploading file to GCS: {e}")
+                raise e
+                         
+        elif cloud_env == "aws":
+            L.info("Creating S3 client")
+            if self.client is None:
+                try:
+                    self.client = boto3.client("s3")
+                except Exception as e:
+                    L.error(f"Error creating S3 client: {e}")
+                    raise e
+            try:
+                L.info(f"Uploading {self.compressed_file_path} to {self.bucket_name}")
+                self.client.upload_file(
+                    self.compressed_file_path, self.bucket_name, f"sent_reports/{self.compressed_file_path}"
+                )
+            except Exception as e:
+                L.error(f"Error uploading file to S3: {e}")
+                raise e
+
+        else:
+            raise ValueError(f"Unsupported cloud provider: {cloud_env}")
+
+

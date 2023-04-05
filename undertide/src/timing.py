@@ -1,8 +1,8 @@
 from datetime import datetime
 from functools import wraps
-from src.logging import setup_logging
+from src.logger import setup_logger
 
-LOG = setup_logging()
+L = setup_logger()
 
 
 def log_timing(func):
@@ -24,7 +24,7 @@ def log_timing(func):
         result = func()
         ended_at = datetime.now()
         delta = ended_at - started_at
-        LOG.debug(f"Ran {func.__name__} in {delta}")
+        L.debug(f"Ran {func.__name__} in {delta}")
         return result
 
     return wrapper

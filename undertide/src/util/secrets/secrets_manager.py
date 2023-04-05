@@ -2,8 +2,8 @@ import os
 import time
 
 # import datetime
-from src.util.secrets.aws_secret_manager import UndertideAWSSecretsManager
-from src.util.secrets.gcp_secret_manager import UndertideGCPSecretsManager
+from src.util.secrets.aws_secrets_manager import UndertideAWSSecretsManager
+from src.util.secrets.gcp_secrets_manager import UndertideGCPSecretsManager
 
 
 class UndertideSecretsManager:
