@@ -1,7 +1,6 @@
-.PHONY: install shell ipython test black lint count docker-build docker-push help
+.PHONY: install shell ipython test black ruff count docker-build docker-push help
 PROJECT=undertide
 CODE=${PROJECT}/src/
-ENTRYPOINTS=${PROJECT}/bin/
 TESTS=${PROJECT}/tests/
 DOCKER_IMG=${PROJECT}
 ENVIRONMENT?=dev
@@ -22,10 +21,10 @@ test: ## Run all tests
 	poetry run dotenv -f ${PROJECT}/.env/test run pytest --cov-report term-missing --cov=src/ ${PROJECT}/tests/ -W ignore::DeprecationWarning
 
 black: ## Auto-format all python code
-	poetry run black $(CODE) $(ENTRYPOINTS) $(TESTS)
+	poetry run black $(CODE) $(TESTS)
 
 ruff: ## Auto-check all python code
-	poetry run ruff $(CODE) $(ENTRYPOINTS) $(TESTS)
+	poetry run ruff $(CODE) $(TESTS)
 
 docker-build: ## Build the docker image
 	docker build --ssh default . --platform linux/amd64 --tag=$(DOCKER_IMG)

@@ -4,6 +4,7 @@ from src.logging import setup_logging
 
 LOG = setup_logging()
 
+
 def log_timing(func):
     """
     This is a decorator, which is useful when you want

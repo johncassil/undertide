@@ -6,7 +6,8 @@ L = setup_logger()
 
 
 def parse_config_from_secret_config_file():
-    # Get the config_secret from mounted file secrets/config.json and determine the service to use, use it to initiate the secret manager client and secrets cache
+    # Get the config_secret from mounted file secrets/config.json and determine the
+    # service to use, use it to initiate the secret manager client and secrets cache
     L.info("Getting config_secret from mounted file secrets/config.json...")
     try:
         with open("secrets/config.json", "r") as file:
@@ -14,8 +15,11 @@ def parse_config_from_secret_config_file():
             L.info("Got config_secret from mounted file secrets/config.json!")
             parse_config(config_secret)
     except Exception as e:
-        L.error(f"Error getting config_secret from mounted file secrets/config.json: {e}")
+        L.error(
+            f"Error getting config_secret from mounted file secrets/config.json: {e}"
+        )
         raise e
+
 
 def parse_config(config_secret: dict):
     """Parses the config and sets the env variables.
@@ -41,7 +45,7 @@ def parse_config(config_secret: dict):
     - duckdb_file_bucket
     - duckdb_file_path
     """
-    
+
     L.info("Getting cloud_provider and setting env variable...")
     cloud_provider = config_secret.get("cloud_provider")
     if not cloud_provider:
@@ -56,7 +60,7 @@ def parse_config(config_secret: dict):
             L.error("gcp_project is missing from config_secret!")
             raise Exception("gcp_project is missing from config_secret!")
         os.environ["GCP_PROJECT"] = gcp_project
-    
+
     elif cloud_provider == "aws":
         L.info("Getting aws_region and setting env variable...")
         aws_region = config_secret.get("aws_region")
@@ -78,7 +82,7 @@ def parse_config(config_secret: dict):
             L.error("aws_secret_access_key is missing from config_secret!")
             raise Exception("aws_secret_access_key is missing from config_secret!")
         os.environ["AWS_SECRET_ACCESS_KEY"] = aws_secret_access_key
-    
+
     L.info("Getting reports_config_bucket and setting env variable...")
     reports_config_bucket = config_secret.get("reports_config_bucket")
     if not reports_config_bucket:
@@ -90,8 +94,11 @@ def parse_config(config_secret: dict):
     reports_archive_bucket = config_secret.get("reports_archive_bucket")
     if not reports_archive_bucket:
         L.info("reports_archive_bucket is missing from config_secret!")
-        L.info("Setting reports_archive_bucket path to reports_config_bucket/delivered_reports...")
-        reports_archive_bucket = f"reports_config_bucket/delivered_reports"
+        L.info(
+            "Setting reports_archive_bucket path to "
+            "reports_config_bucket/delivered_reports..."
+        )
+        reports_archive_bucket = "reports_config_bucket/delivered_reports"
     os.environ["REPORTS_ARCHIVE_BUCKET"] = reports_config_bucket
 
     L.info("Getting bigquery_project and setting env variable...")
@@ -164,7 +171,7 @@ def parse_config(config_secret: dict):
         L.info("mysql_connection_string is missing from config_secret!")
         L.info("Setting mysql_connection_string to None...")
     os.environ["MYSQL_CONNECTION_STRING"] = mysql_connection_string
-    
+
     L.info("Getting duckdb_file_bucket and setting env variable...")
     duckdb_file_bucket = config_secret.get("duckdb_file_bucket")
     if not duckdb_file_bucket:
@@ -178,7 +185,7 @@ def parse_config(config_secret: dict):
         L.info("duckdb_file_path is missing from config_secret!")
         L.info("Setting duckdb_file_path to None...")
     os.environ["DUCKDB_FILE_PATH"] = duckdb_file_path
-    
+
 
 def parse_callable_config(config_secret):
     """Parses the config and sets the env variables.
@@ -193,7 +200,8 @@ def parse_callable_config(config_secret):
 
     returns: secret
     """
-    # Determine the service to use, use it to initiate the secret manager client and secrets cache
+    # Determine the service to use, use it to initiate the secret manager client
+    # and secrets cache
 
     L.info("Getting cloud_provider and setting env variable...")
     cloud_provider = config_secret.get("cloud_provider")
@@ -209,7 +217,7 @@ def parse_callable_config(config_secret):
             L.error("gcp_project is missing from config_secret!")
             raise Exception("gcp_project is missing from config_secret!")
         os.environ["GCP_PROJECT"] = gcp_project
-    
+
     elif cloud_provider == "aws":
         L.info("Getting aws_region and setting env variable...")
         aws_region = config_secret.get("aws_region")
@@ -222,16 +230,16 @@ def parse_callable_config(config_secret):
         if "AWS_ACCESS_KEY_ID" not in os.environ:
             L.error("AWS_ACCESS_KEY_ID is missing from environment!")
             raise Exception("AWS_ACCESS_KEY_ID is missing from environment!")
-        
+
         L.info("Checking that aws_secret_access_key env variable has been set...")
         if "AWS_SECRET_ACCESS_KEY" not in os.environ:
             L.error("AWS_SECRET_ACCESS_KEY is missing from environment!")
             raise Exception("AWS_SECRET_ACCESS_KEY is missing from environment!")
-        
+
     L.info("Getting the name of the config secret...")
     secret_name = config_secret.get("secret_name")
     if not secret_name:
         L.error("secret_name is missing from config_secret!")
         raise Exception("secret_name is missing from config_secret!")
-    
+
     return secret_name

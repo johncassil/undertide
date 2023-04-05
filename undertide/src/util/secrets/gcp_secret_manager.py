@@ -32,7 +32,8 @@ class UndertideGCPSecretsManager:
 
         if not project_id:
             L.debug(
-                "GCP_PROJECT not found in environment vars. Attempting to get project_id from google auth call."
+                "GCP_PROJECT not found in environment vars. Attempting "
+                "to get project_id from google auth call."
             )
             _, project_id = google.auth.default()
 
@@ -63,7 +64,7 @@ class UndertideGCPSecretsManager:
     #     response = client.access_secret_version(request={"name": name})
     #     tokens_json = json.loads(response.payload.data.decode("UTF-8"))
     #     return tokens_json
-    
+
     def get_secret(self, secret_id, version_id="latest"):
         """Retrieves stored contents for secret in GCP Secret Manager.
 
@@ -78,9 +79,8 @@ class UndertideGCPSecretsManager:
         """
 
         L.info(
-            "Attempting to retrieve secret {}:{} from secrets manager in project {}".format(
-                secret_id, version_id, self.project_id
-            )
+            f"Attempting to retrieve secret {secret_id}:{version_id} from "
+            f"Secret Manager in project {self.project_id}."
         )
 
         # Access the secret version.
@@ -89,14 +89,11 @@ class UndertideGCPSecretsManager:
         )
 
         # Return the decoded payload
-        L.info(
-            "Reading secret {}:{} payload as json.".format(secret_id, version_id)
-        )
+        L.info("Reading secret {}:{} payload as json.".format(secret_id, version_id))
         try:
             json_secret = json.loads(response.payload.data.decode("UTF-8"))
-            
+
         except json.decoder.JSONDecodeError:
             raise ValueError("Secrets Manager secret %s is not valid JSON." % secret_id)
-
 
         return json_secret
