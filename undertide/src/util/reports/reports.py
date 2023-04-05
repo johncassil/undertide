@@ -91,19 +91,19 @@ class UndertideReport:
         return report_writer.local_file_path
 
     def build_py_report(self):
-        user_function_str = str(self.report_config.py["code"])
         # Pass this to a class that will find the file, ensure that it only matches
         # one file, and then download the file locally and rename it to the report name
         # and return the local file name. If the file format is not the same as the file
         # format requested, then we will convert the file to the requested format.
-        local_file_path = UndertidePyFileFinder(
+        py_file_finder = UndertidePyFileFinder(
             self.report_config.data_pull_method,
             self.report_name,
             self.report_config.bucket,
             self.file_format,
             self.dry_run,
-            user_function_str,
+            self.report_config.py,
         )
+        local_file_path = py_file_finder.get_file()
         return local_file_path
 
     def deliver_report(self):

@@ -8,10 +8,10 @@ L = setup_logger()
 
 class UndertideRedshift:
     def __init__(self):
-        self.conn = self.connect_to_redshift()
-        self.cursor = self.conn.cursor()
+        self.conn = None
+        self.cursor = None
 
-    def connect_to_redshift():
+    def connect_to_redshift(self):
         L.info("Connecting to Redshift!")
         connection_string = os.environ.get("REDSHIFT_CONNECTION_STRING")
         conn = pg.connect(connection_string)
@@ -20,6 +20,10 @@ class UndertideRedshift:
     def execute_query(self, query: str) -> pd.DataFrame:
         """Executes a query and returns the results as a pandas dataframe."""
         L.info(f"Executing query: {query}")
+
+        if self.conn is None:
+            self.conn = self.connect_to_redshift()
+            self.cursor = self.conn.cursor()
 
         try:
             self.cursor.execute(query)

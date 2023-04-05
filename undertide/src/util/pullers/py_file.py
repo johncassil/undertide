@@ -6,6 +6,10 @@ from datetime import datetime
 
 L = setup_logger()
 
+# Define a placeholder function for find_file() that will be replaced by the user's function
+def find_file(client, bucket):
+    L.error(f"find_file() function not defined by the user in the py file.{client} and {bucket} were given ")
+    raise NotImplementedError("find_file() function not defined by the user in the py file.")
 
 class UndertidePyFileFinder:
     def __init__(
@@ -17,12 +21,12 @@ class UndertidePyFileFinder:
         dry_run: bool,
         user_function_str: str,
     ):
-        self.user_function = {}
-        exec(user_function_str, self.user_function)
+        self.user_function_str = user_function_str
         self.bucket_type = data_pull_method
         self.bucket = bucket
         self.file_format = file_format
         self.report_name = report_name
+        self.dry_run = dry_run
         if self.dry_run:
             timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
             self.file_name = f"DRY_RUN_{self.report_name}_{timestamp}"
@@ -30,7 +34,7 @@ class UndertidePyFileFinder:
             self.file_name = (
                 f"{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
             )
-        self.local_file_path = self.get_file()
+    
 
     def get_file(self):
         L.info(
@@ -47,7 +51,9 @@ class UndertidePyFileFinder:
                 raise e
 
             try:
-                file_path = self.user_function["find_file"](self.bucket)
+                L.info(f"The following user defined function was given: {self.user_function_str}")
+                exec(self.user_function_str, globals())
+                file_path = find_file(client, self.bucket)
                 file_extension = file_path.split(".")[-1]
                 downloaded_file = f"{self.file_name}.{file_extension}"
                 client.download_file(self.bucket, file_path, downloaded_file)
@@ -64,10 +70,12 @@ class UndertidePyFileFinder:
                 raise e
 
             try:
-                bucket = client.get_bucket(self.bucket)
-                file_path = self.user_function["find_file"](self.bucket)
+                L.info(f"The following user defined function was given: {self.user_function_str}")
+                exec(self.user_function_str, globals())
+                file_path = find_file(client, self.bucket)
                 file_extension = file_path.split(".")[-1]
                 downloaded_file = f"{self.file_name}.{file_extension}"
+                bucket = client.bucket(self.bucket)
                 blob = bucket.blob(file_path)
                 blob.download_to_filename(downloaded_file)
             except Exception as e:

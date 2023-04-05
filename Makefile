@@ -18,7 +18,7 @@ ipython: ## Run ipython
 	poetry run dotenv -f ${PROJECT}/.env/env run ipython
 
 test: ## Run all tests
-	poetry run dotenv -f ${PROJECT}/.env/test run pytest --cov-report term-missing --cov=src/ ${PROJECT}/tests/ -W ignore::DeprecationWarning
+	poetry run dotenv -f ${PROJECT}/.env/test run pytest --cov-report term-missing --cov=undertide/src/ ${PROJECT}/tests/ -W ignore::DeprecationWarning
 
 black: ## Auto-format all python code
 	poetry run black $(CODE) $(TESTS)

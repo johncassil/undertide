@@ -10,31 +10,25 @@ from src.util.pullers.duckdb import UndertideDuckDB
 class UndertideSqlReportGenerator:
     def __init__(self, db_type: str):
         self.db_type = db_type
+        self.client = None
 
     def execute_query(self, query: str) -> pd.DataFrame:
+        """Executes a query and returns the results as a pandas dataframe."""
+        self.client = self._get_client()
+        return self.client.execute_query(query)
+
+    def _get_client(self):
         if self.db_type == "bigquery":
-            client = UndertideBigQuery()
-            return client.execute_query(query)
-
+            return UndertideBigQuery()
         elif self.db_type == "snowflake":
-            client = UndertideSnowflake()
-            return client.execute_query(query)
-
+            return UndertideSnowflake()
         elif self.db_type == "redshift":
-            client = UndertideRedshift()
-            return client.execute_query(query)
-
+            return UndertideRedshift()
         elif self.db_type == "postgres":
-            client = UndertidePostgres()
-            return client.execute_query(query)
-
+            return UndertidePostgres()
         elif self.db_type == "mysql":
-            client = UndertideMysql()
-            return client.execute_query(query)
-
+            return UndertideMysql()
         elif self.db_type == "duckdb":
-            client = UndertideDuckDB()
-            return client.execute_query(query)
-
+            return UndertideDuckDB()
         else:
-            raise ValueError("Invalid database type")
+            raise ValueError(f"Invalid db_type: {self.db_type}")

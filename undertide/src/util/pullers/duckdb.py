@@ -18,6 +18,7 @@ class UndertideDuckDB:
             f"in bucket: {duck_db_file_bucket}"
         )
         ## TODO: Implement cloud agnostic pull of file locally.
+        ## TODO: Write tests for this.
 
         # return file_path
 

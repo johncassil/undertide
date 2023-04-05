@@ -1,1 +1,2 @@
 LOCAL=TRUE
+GCP_PROJECT=your-project-id

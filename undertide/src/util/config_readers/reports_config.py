@@ -60,8 +60,9 @@ class UndertideCloudFileRetriever:
         elif file_type == "sql":
             file_content = file_content.strip()
         elif file_type == "py":
-            compiled_code = compile(file_content, file_name, "exec")
-            file_content = {"code": compiled_code, "name": file_name}
+            file_content = file_content
+        else:
+            raise ValueError(f"Unknown file type: {file_type}")
 
         return file_content
 

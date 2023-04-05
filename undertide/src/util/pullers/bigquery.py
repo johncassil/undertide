@@ -20,7 +20,6 @@ class UndertideBigQuery:
     def execute_query(self, query: str) -> pd.DataFrame:
         """Executes a query and returns the results as a pandas dataframe."""
         L.info(f"Executing query: {query}")
-
         try:
             df = self.client.query(query).to_dataframe()
 

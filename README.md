@@ -175,6 +175,7 @@ The report configuration is a yaml file that expects the following fields:
 - python_file (string) - If you are using s3 or gcs as your data_pull_method, you can also specify a file selection function.  This is useful if you want to pull data from a specific file in a bucket, or if you want to pull data from a specific file in a directory in a bucket. This is the name of the python file that will be used to pull the data if it's not a sql-based backend.  This file should be stored in the same bucket as the report configuration file. By convention, this file should be stored in a directory 'reports/python'.  The file should contain a function definition for def find_file(bucket). Here are a couple of examples:
 
 ```python
+from datetime import datetime
 def find_file(bucket):
     for obj in bucket.objects.all():
         if obj.key.endswith('.csv') and obj.last_modified >= datetime(2023, 3, 1):
