@@ -172,39 +172,17 @@ The report configuration is a yaml file that expects the following fields:
     - zip
     - bz2
 - sql_file (string) - This is the name of the sql file that will be used to pull the data.  This file should be stored in the same bucket as the report configuration file.  By convention, this file should be stored in a directory 'reports/sql'.
-- python_file (string) - If you are using s3 or gcs as your data_pull_method, you can also specify a file selection function.  This is useful if you want to pull data from a specific file in a bucket, or if you want to pull data from a specific file in a directory in a bucket. This is the name of the python file that will be used to pull the data if it's not a sql-based backend.  This file should be stored in the same bucket as the report configuration file. By convention, this file should be stored in a directory 'reports/python'.  The file should contain a function definition for def find_file(bucket). Here are a couple of examples:
+- python_file (string) - If you are using s3 or gcs as your data_pull_method, you can also specify a file selection function.  This is useful if you want to pull data from a specific file in a bucket, or if you want to pull data from a specific file in a directory in a bucket. This is the name of the python file that will be used to pull the data if it's not a sql-based backend.  This file should be stored in the same bucket as the report configuration file. By convention, this file should be stored in a directory 'reports/python'.  The file should contain a function definition for `def find_file(client, bucket)` (where client is either a gcs storage client or an s3 boto3 client). Here is an example:
 
 ```python
-from datetime import datetime
-def find_file(bucket):
-    for obj in bucket.objects.all():
-        if obj.key.endswith('.csv') and obj.last_modified >= datetime(2023, 3, 1):
-            return obj.key
-    return None 
-```
-
-```python
-
 import datetime
-
-def find_file(bucket):
-    # Define the directory to search in
-    directory = 'reports/'
-
-    # Define the prefix to filter for CSV files
-    prefix = directory + '*.csv'
-
-    # Get a list of objects matching the prefix
-    objects = list(bucket.objects.filter(Prefix=prefix))
-
-    # Filter for objects with a timestamp in the last 2 days
-    objects = [obj for obj in objects if obj.last_modified >= datetime.datetime.now() - datetime.timedelta(days=2)]
-
-    # Sort the objects by last modified time
-    objects.sort(key=lambda obj: obj.last_modified, reverse=True)
-
-    # Return the key of the most recent object, or None if no objects found
-    return objects[0].key if objects else None
+def find_file(client, bucket: str):
+    ## Find the most recent file in the bucket that ends with .csv
+    files = client.list_objects(Bucket=bucket)["Contents"]
+    files = [f["Key"] for f in files if f["Key"].endswith(".csv")]
+    files = sorted(files, key=lambda x: datetime.strptime(x.split("_")[-1], "%Y%m%d.csv"))
+    return files[-1]
+"""
 ```
 
 

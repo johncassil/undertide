@@ -25,7 +25,6 @@ class UndertidePostgres:
             self.conn = self.connect_to_postgres()
             self.cursor = self.conn.cursor()
 
-
         try:
             self.cursor.execute(query)
             columns = [desc[0] for desc in self.cursor.description]

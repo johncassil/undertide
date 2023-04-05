@@ -6,10 +6,18 @@ from datetime import datetime
 
 L = setup_logger()
 
-# Define a placeholder function for find_file() that will be replaced by the user's function
+
+# Define a placeholder function for find_file()
+# that will be replaced by the user's function
 def find_file(client, bucket):
-    L.error(f"find_file() function not defined by the user in the py file.{client} and {bucket} were given ")
-    raise NotImplementedError("find_file() function not defined by the user in the py file.")
+    L.error(
+        f"find_file() function not defined by the user in the py file. "
+        f"{client} and {bucket} were given "
+    )
+    raise NotImplementedError(
+        "find_file() function not defined by the user in the py file."
+    )
+
 
 class UndertidePyFileFinder:
     def __init__(
@@ -34,7 +42,6 @@ class UndertidePyFileFinder:
             self.file_name = (
                 f"{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
             )
-    
 
     def get_file(self):
         L.info(
@@ -51,7 +58,10 @@ class UndertidePyFileFinder:
                 raise e
 
             try:
-                L.info(f"The following user defined function was given: {self.user_function_str}")
+                L.info(
+                    "The following user defined function was given: "
+                    f"{self.user_function_str}"
+                )
                 exec(self.user_function_str, globals())
                 file_path = find_file(client, self.bucket)
                 file_extension = file_path.split(".")[-1]
@@ -70,7 +80,10 @@ class UndertidePyFileFinder:
                 raise e
 
             try:
-                L.info(f"The following user defined function was given: {self.user_function_str}")
+                L.info(
+                    "The following user defined function was given:"
+                    f"{self.user_function_str}"
+                )
                 exec(self.user_function_str, globals())
                 file_path = find_file(client, self.bucket)
                 file_extension = file_path.split(".")[-1]
