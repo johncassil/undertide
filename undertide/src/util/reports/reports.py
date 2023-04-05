@@ -10,7 +10,7 @@ from src.util.pullers.py_file import UndertidePyFileFinder
 L = setup_logger()
 
 class UndertideReport():
-    def __init__(self, report_name, report_config_jinja, delivery_method, delivery_secret_name, file_format, compression, delivery_directory):
+    def __init__(self, report_name: str, report_config_jinja: str, delivery_method: str, delivery_secret_name: str, file_format: str, compression: str, delivery_directory: str, dry_run: bool):
         self.report_name = report_name
         self.report_config_jinja = report_config_jinja
         self.delivery_method = delivery_method
@@ -18,11 +18,16 @@ class UndertideReport():
         self.file_format = file_format
         self.compression = compression
         self.delivery_directory = delivery_directory
+        self.dry_run = dry_run
         self.report_config = self.get_report_config()
         if self.delivery_directory is None:
             self.delivery_directory = self.report_config.delivery_directory
         self.local_file_path = self.build_report()
-        self.delivered_report = self.deliver_report()
+        if self.dry_run:
+            L.info(f"DRY RUN: Not delivering report {self.report_name}")
+            self.delivered_report = None
+        else:
+            self.delivered_report = self.deliver_report()
 
     def get_report_config(self):
         # Get the report config from the bucket
@@ -56,7 +61,7 @@ class UndertideReport():
         return report_data
 
     def write_report(self, report_data):
-        report_writer = UndertideReportWriter(report_data, self.file_format, self.report_name, self.compression, self.delivery_directory)
+        report_writer = UndertideReportWriter(report_data, self.file_format, self.report_name, self.compression, self.delivery_directory, self.dry_run)
         report_writer.write_report()
         return report_writer.local_file_path
 
@@ -65,7 +70,7 @@ class UndertideReport():
         # pass this to a class that will find the file, ensure that it only matches one file, 
         # and then download the file locally and rename it to the report name and return the local file name.
         # If the file format is not the same as the file format requested, then we will convert the file to the requested format.
-        local_file_path = UndertidePyFileFinder(self.report_config.data_pull_method, self.report_name, self.report_config.bucket, self.file_format, user_function_str)
+        local_file_path = UndertidePyFileFinder(self.report_config.data_pull_method, self.report_name, self.report_config.bucket, self.file_format, self.dry_run, user_function_str)
         return local_file_path
 
     def deliver_report(self):

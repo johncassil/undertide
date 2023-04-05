@@ -12,13 +12,17 @@ from src.logger import setup_logger
 L = setup_logger()
 
 class UndertideReportWriter:
-    def __init__(self, report_data: pd.DataFrame, file_format: str, report_name: str, compression: str):
+    def __init__(self, report_data: pd.DataFrame, file_format: str, report_name: str, compression: str, dry_run: bool):
         self.report_data = report_data
         self.file_format = file_format
         self.report_name = report_name
         self.compression = compression
         self.bucket_name = os.getenv('REPORTS_ARCHIVE_BUCKET')
-        self.file_name = f"{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+        self.dry_run = dry_run
+        if self.dry_run:
+            self.file_name = f"DRY_RUN_{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+        else:
+            self.file_name = f"{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
         self.local_file_path = f"{self.file_name}.{self.file_type}"
         self.compressed_file_path = self.local_file_path
         self.cloud_prefix = self.get_cloud_provider()

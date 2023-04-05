@@ -37,6 +37,7 @@ def build_and_send_report():
         file_format=body.get("file_format"),
         compression=body.get("compression"),
         delivery_directory=body.get("delivery_directory"),
+        dry_run=body.get("dry_run"),
     )
 
     L.info(f"Report delivered as {report.delivered_report}!")

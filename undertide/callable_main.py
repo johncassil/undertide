@@ -57,6 +57,13 @@ L = setup_logger()
     help="undertide references a secret for its own configuration. If running via Cloud Run or Fargate, the secret should be mounted to the container at secrets/config.yml and this is not needed. If this is running in a kubernetes pod operator or ecs operator, the container will not have this config on boot, and this field should be used to specify information on how to obtain the secret that contains the config, as well as the service to use. e.g. {'secret': 'undertide-config', 'service': 'aws'} | {'secret': 'undertide-config', 'service': 'gcp', 'project': 'my-project'}",
 )
 
+@click.option(
+    "--dry_run",
+    required=False,
+    default=False,
+    help="If true, the report will not be delivered, but the file will still be exported to the archive bucket for testing purposes. The file name will indicate that it is a dry run.",
+)
+
 def build_and_send_report(
     report_name: str,
     report_config_jinja: str,
@@ -65,7 +72,8 @@ def build_and_send_report(
     file_format: str,
     compression: str,
     delivery_directory: str,
-    config_secret: str
+    config_secret: str,
+    dry_run: bool
     ):
 
     # Get the config_secret from click and determine the service to use, use it to initiate the secret manager client and secrets cache
@@ -86,7 +94,8 @@ def build_and_send_report(
         delivery_secret_name=delivery_secret_name,
         file_format=file_format,
         compression=compression,
-        delivery_directory=delivery_directory
+        delivery_directory=delivery_directory,
+        dry_run=dry_run
     )
     L.info(f"Report delivered as {report.delivered_report}!")
 

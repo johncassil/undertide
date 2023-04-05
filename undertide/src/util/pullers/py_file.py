@@ -8,14 +8,17 @@ from datetime import datetime
 L = setup_logger()
 
 class UndertidePyFileFinder:
-    def __init__(self, data_pull_method: str, report_name: str, bucket: str, file_format: str, user_function_str: str):
+    def __init__(self, data_pull_method: str, report_name: str, bucket: str, file_format: str, dry_run: bool, user_function_str: str):
         self.user_function = {}
         exec(user_function_str, self.user_function)
         self.bucket_type = data_pull_method
         self.bucket = bucket
         self.file_format = file_format
         self.report_name = report_name
-        self.file_name = f"{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+        if self.dry_run:
+            self.file_name = f"DRY_RUN_{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+        else:
+            self.file_name = f"{self.report_name}_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
         self.local_file_path = self.get_file()
 
     def get_file(self):
