@@ -63,10 +63,9 @@ class UndertideReport():
     def build_py_report(self):
         user_function_str = str(self.report_config.py['code'])
         # pass this to a class that will find the file, ensure that it only matches one file, 
-        # and then download the file locally and rename it to the report name and return the local file name
-        # note, this does not change the base data format.  That would need to be done by going upstream.  
-        # This is just a shim in order to use files that another process has already created.
-        local_file_path = UndertidePyFileFinder(self.report_name, self.report_config.bucket, user_function_str)
+        # and then download the file locally and rename it to the report name and return the local file name.
+        # If the file format is not the same as the file format requested, then we will convert the file to the requested format.
+        local_file_path = UndertidePyFileFinder(self.report_config.data_pull_method, self.report_name, self.report_config.bucket, self.file_format, user_function_str)
         return local_file_path
 
     def deliver_report(self):
